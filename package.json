@@ -1,8 +1,8 @@
 {
-  "name": "edex-ui",
-  "productName": "eDEX-UI",
-  "version": "2.2.8",
-  "description": "A science fiction desktop running everywhere. Awesome.",
+  "name": "syn-os",
+  "productName": "SYN OS",
+  "version": "5.1.0",
+  "description": "SYN OS - Native Desktop Operating System Monitor",
   "keywords": [
     "desktop",
     "sci-fi",
@@ -11,9 +11,14 @@
     "tty",
     "terminal"
   ],
-  "main": "src/_boot.js",
+  "main": "electron/main.js",
   "scripts": {
-    "start": "electron src --nointro",
+    "dev": "electron .",
+    "build": "electron-builder",
+    "build:win": "electron-builder --win",
+    "build:mac": "electron-builder --mac",
+    "build:linux": "electron-builder --linux",
+    "start": "electron .",
     "install-linux": "npm install && cd src && npm install && ./../node_modules/.bin/electron-rebuild -f -w node-pty && cd ..",
     "preinstall-windows": "npm install --global --production windows-build-tools && npm install --global node-gyp && setx PYTHON \"%USERPROFILE%\\.windows-build-tools\\python27\\python.exe\"",
     "install-windows": "npm install && cd src && npm install && ..\\node_modules\\.bin\\electron-rebuild -f -w node-pty && cd ..",
@@ -41,16 +46,22 @@
   },
   "homepage": "https://github.com/GitSquared/edex-ui#readme",
   "build": {
-    "appId": "com.edex.ui",
-    "productName": "eDEX-UI",
+    "appId": "com.synos.app",
+    "productName": "SYN OS",
     "publish": "github",
     "asar": true,
     "compression": "normal",
     "copyright": "Copyright © 2017-2021 Gabriel 'Squared' SAILLARD <gabriel@saillard.dev> (https://gaby.dev)",
     "directories": {
       "output": "dist",
-      "app": "prebuild-src"
+      "buildResources": "assets"
     },
+    "files": [
+      "electron/**/*",
+      "src/**/*",
+      "index.html",
+      "node_modules/**/*"
+    ],
     "forceCodeSigning": false,
     "npmRebuild": true,
     "artifactName": "eDEX-UI-${os}-${arch}.${ext}",
@@ -99,16 +110,27 @@
     }
   },
   "dependencies": {
+    "@types/leaflet": "^1.9.21",
     "clean-css": "5.2.1",
-    "electron": "^12.1.0",
     "electron-builder": "^22.14.5",
     "electron-rebuild": "^2.3.5",
+    "leaflet": "^1.9.4",
     "mime-types": "^2.1.33",
     "node-abi": "2.30.1",
     "node-json-minify": "1.0.0",
     "terser": "^5.9.0"
   },
   "optionalDependencies": {
+    "@rollup/rollup-win32-x64-msvc": "^4.57.1",
     "cson-parser": "4.0.9"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^6.2.4",
+    "@tsconfig/svelte": "^5.0.7",
+    "electron": "^40.1.0",
+    "electron-is-dev": "^3.0.1",
+    "socket.io-client": "^4.8.3",
+    "svelte": "^5.49.2",
+    "typescript": "^5.9.3"
   }
 }

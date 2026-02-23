@@ -1,66 +1,710 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="utf-8" />
-        <meta http-equiv="Content-Security-Policy" content="default-src file: 'unsafe-inline'; img-src file: data:; media-src file:; connect-src ws: file:">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>eDEX-UI</title>
+<html lang="en">
 
-        <!-- Load dependency css -->
-        <link rel="stylesheet" href="node_modules/augmented-ui/augmented.css" />
-        <!-- Load main css -->
-        <link rel="stylesheet" href="assets/css/main.css" />
-        <link rel="stylesheet" href="assets/css/modal.css" />
-        <link rel="stylesheet" href="assets/css/boot_screen.css" />
-        <link rel="stylesheet" href="assets/css/media_player.css" />
-        <!-- Load main modules css -->
-        <link rel="stylesheet" href="assets/css/main_shell.css" />
-        <link rel="stylesheet" href="assets/css/filesystem.css" />
-        <link rel="stylesheet" href="assets/css/keyboard.css" />
-        <!-- Load secondary modules css -->
-        <link rel="stylesheet" href="assets/css/mod_column.css" />
-        <link rel="stylesheet" href="assets/css/mod_clock.css" />
-        <link rel="stylesheet" href="assets/css/mod_sysinfo.css" />
-        <link rel="stylesheet" href="assets/css/mod_hardwareInspector.css" />
-        <link rel="stylesheet" href="assets/css/mod_cpuinfo.css" />
-        <link rel="stylesheet" href="assets/css/mod_netstat.css" />
-        <link rel="stylesheet" href="assets/css/mod_conninfo.css" />
-        <link rel="stylesheet" href="assets/css/mod_globe.css" />
-        <link rel="stylesheet" href="assets/css/mod_ramwatcher.css" />
-        <link rel="stylesheet" href="assets/css/mod_toplist.css" />
-        <link rel="stylesheet" href="assets/css/mod_fuzzyFinder.css" />
-        <link rel="stylesheet" href="assets/css/mod_processlist.css" />
-        <!-- Load extra CSS -->
-        <link rel="stylesheet" href="assets/css/extra_ratios.css" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SYN OS - Neural Operating System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-        <!-- Load dependency js -->
-        <script src="node_modules/pdfjs-dist/build/pdf.js"></script>
-        <!-- Load main modules classes -->
-        <script src="classes/modal.class.js"></script>
-        <script src="classes/terminal.class.js"></script>
-        <script src="classes/docReader.class.js"></script>
-        <script src="classes/mediaPlayer.class.js"></script>
-        <script src="classes/filesystem.class.js"></script>
-        <script src="classes/keyboard.class.js"></script>
-        <script src="classes/updateChecker.class.js"></script>
-        <!-- Load secondary modules classes -->
-        <script src="classes/clock.class.js"></script>
-        <script src="classes/sysinfo.class.js"></script>
-        <script src="classes/hardwareInspector.class.js"></script>
-        <script src="classes/cpuinfo.class.js"></script>
-        <script src="classes/netstat.class.js"></script>
-        <script src="classes/conninfo.class.js"></script>
-        <script src="classes/locationGlobe.class.js"></script>
-        <script src="classes/ramwatcher.class.js"></script>
-        <script src="classes/toplist.class.js"></script>
-        <script src="classes/fuzzyFinder.class.js"></script>
-        <!-- Load extra classes -->
-        <script src="classes/audiofx.class.js"></script>
-    </head>
-    <body class="solidBackground">
-        <section id="boot_screen">
+        body {
+            font-family: 'Courier New', monospace;
+            background: #0a0e27;
+            color: #00ffff;
+            overflow: hidden;
+            min-height: 100vh;
+        }
+
+        /* Title Bar */
+        .title-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 32px;
+            background: #000;
+            border-bottom: 2px solid #00ffff;
+            padding: 0 10px;
+            -webkit-app-region: drag;
+        }
+
+        .title-bar .title {
+            font-size: 11px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-shadow: 0 0 10px #00ffff;
+        }
+
+        .window-controls {
+            display: flex;
+            -webkit-app-region: no-drag;
+        }
+
+        .control-btn {
+            width: 46px;
+            height: 32px;
+            border: none;
+            background: transparent;
+            color: #00ffff;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.2s;
+        }
+
+        .control-btn:hover {
+            background: #1a3a4a;
+            color: #00ff00;
+        }
+
+        .control-btn.close:hover {
+            background: #ff0033;
+            color: white;
+        }
+
+        /* Navigation Bar */
+        .nav-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background: linear-gradient(180deg, #000 0%, #0a0e27 100%);
+            border-bottom: 1px solid #00ffff;
+            box-shadow: 0 4px 20px rgba(0, 255, 255, 0.2);
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo {
+            font-size: 1.5em;
+            font-weight: bold;
+            text-shadow: 0 0 15px #00ffff;
+            letter-spacing: 3px;
+        }
+
+        .version {
+            font-size: 0.7em;
+            color: #00ff00;
+            background: rgba(0, 255, 0, 0.1);
+            padding: 2px 8px;
+            border: 1px solid #00ff00;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 5px;
+        }
+
+        .nav-tab {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: transparent;
+            border: 1px solid #333;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            font-size: 0.85em;
+            letter-spacing: 1px;
+        }
+
+        .nav-tab:hover {
+            border-color: #00ffff;
+            color: #00ffff;
+            background: rgba(0, 255, 255, 0.05);
+        }
+
+        .nav-tab.active {
+            border-color: #00ffff;
+            color: #00ffff;
+            background: rgba(0, 255, 255, 0.15);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .metric {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .metric-label {
+            font-size: 0.7em;
+            color: #666;
+        }
+
+        .metric-value {
+            font-size: 1em;
+            color: #00ff00;
+            text-shadow: 0 0 10px #00ff00;
+        }
+
+        .timestamp {
+            font-size: 0.8em;
+            color: #666;
+        }
+
+        /* Main Content */
+        .main-content {
+            display: flex;
+            height: calc(100vh - 100px);
+            padding: 20px;
+            gap: 20px;
+        }
+
+        .sidebar {
+            width: 280px;
+            flex-shrink: 0;
+        }
+
+        .center-panel {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        /* Panels */
+        .panel {
+            border: 1px solid #00ffff;
+            background: rgba(0, 0, 0, 0.6);
+            margin-bottom: 20px;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.1);
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: rgba(0, 255, 255, 0.1);
+            border-bottom: 1px solid #00ffff;
+        }
+
+        .panel-title {
+            font-size: 0.9em;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .panel-status {
+            font-size: 0.8em;
+            color: #00ff00;
+        }
+
+        .panel-content {
+            padding: 15px;
+        }
+
+        /* Metrics Display */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .metric-box {
+            background: rgba(0, 255, 255, 0.05);
+            padding: 15px;
+            border: 1px solid #333;
+        }
+
+        .metric-box .label {
+            font-size: 0.7em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .metric-box .value {
+            font-size: 1.5em;
+            color: #00ffff;
+        }
+
+        .metric-box .bar {
+            height: 4px;
+            background: #333;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+
+        .metric-box .bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ffff, #00ff00);
+            transition: width 0.3s;
+        }
+
+        /* Task List */
+        .task-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .task-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            border-bottom: 1px solid #222;
+            transition: background 0.2s;
+        }
+
+        .task-item:hover {
+            background: rgba(0, 255, 255, 0.05);
+        }
+
+        .task-name {
+            font-size: 0.9em;
+        }
+
+        .task-status {
+            font-size: 0.8em;
+            padding: 4px 10px;
+            border-radius: 2px;
+        }
+
+        .task-status.running {
+            background: rgba(0, 255, 0, 0.2);
+            color: #00ff00;
+            border: 1px solid #00ff00;
+        }
+
+        .task-status.queued {
+            background: rgba(255, 255, 0, 0.2);
+            color: #ffff00;
+            border: 1px solid #ffff00;
+        }
+
+        .task-status.completed {
+            background: rgba(0, 255, 255, 0.2);
+            color: #00ffff;
+            border: 1px solid #00ffff;
+        }
+
+        /* Security Alerts */
+        .alert-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .alert-item {
+            display: flex;
+            gap: 10px;
+            padding: 10px;
+            border-bottom: 1px solid #222;
+        }
+
+        .alert-icon {
+            font-size: 1.2em;
+        }
+
+        .alert-icon.warning {
+            color: #ffff00;
+        }
+
+        .alert-icon.danger {
+            color: #ff0033;
+        }
+
+        .alert-icon.info {
+            color: #00ffff;
+        }
+
+        .alert-content {
+            flex: 1;
+        }
+
+        .alert-title {
+            font-size: 0.85em;
+            margin-bottom: 5px;
+        }
+
+        .alert-time {
+            font-size: 0.7em;
+            color: #666;
+        }
+
+        /* Status Bar */
+        .status-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            padding: 10px;
+            background: #000;
+            border-top: 1px solid #00ffff;
+            font-size: 0.8em;
+        }
+
+        .status-item {
+            color: #666;
+        }
+
+        .status-item .ok {
+            color: #00ff00;
+            text-shadow: 0 0 5px #00ff00;
+        }
+
+        .status-item .warn {
+            color: #ffff00;
+        }
+
+        /* Hidden panels */
+        .view-panel {
+            display: none;
+        }
+
+        .view-panel.active {
+            display: block;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #0a0e27;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #00ffff;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Title Bar -->
+    <div class="title-bar">
+        <div class="title">SYN OS - NEURAL OPERATING SYSTEM</div>
+        <div class="window-controls">
+            <button class="control-btn" id="minimize-btn" title="Minimize">−</button>
+            <button class="control-btn" id="maximize-btn" title="Maximize">□</button>
+            <button class="control-btn close" id="close-btn" title="Close">✕</button>
+        </div>
+    </div>
+
+    <!-- Navigation Bar -->
+    <nav class="nav-bar">
+        <div class="nav-left">
+            <span class="logo">◈ SYN OS</span>
+            <span class="version">v1.0.0</span>
+        </div>
+
+        <div class="nav-tabs">
+            <button class="nav-tab active" data-view="tasks">
+                <span>◉</span>
+                <span>TASK ORCHESTRATOR</span>
+            </button>
+            <button class="nav-tab" data-view="security">
+                <span>⬢</span>
+                <span>SECURITY CENTER</span>
+            </button>
+            <button class="nav-tab" data-view="ml">
+                <span>◆</span>
+                <span>ML OPTIMIZATION</span>
+            </button>
+            <button class="nav-tab" data-view="cluster">
+                <span>⬡</span>
+                <span>CLUSTER STATUS</span>
+            </button>
+        </div>
+
+        <div class="nav-right">
+            <div class="metric">
+                <span class="metric-label">CPU</span>
+                <span class="metric-value" id="cpu-metric">0.0%</span>
+            </div>
+            <div class="metric">
+                <span class="metric-label">MEM</span>
+                <span class="metric-value" id="mem-metric">0.0%</span>
+            </div>
+            <span class="timestamp" id="timestamp">--</span>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Sidebar: System Metrics -->
+        <aside class="sidebar">
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-title">System Metrics</span>
+                    <span class="panel-status">● LIVE</span>
+                </div>
+                <div class="panel-content">
+                    <div class="metrics-grid">
+                        <div class="metric-box">
+                            <div class="label">CPU USAGE</div>
+                            <div class="value" id="sidebar-cpu">0%</div>
+                            <div class="bar">
+                                <div class="bar-fill" id="cpu-bar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="label">MEMORY</div>
+                            <div class="value" id="sidebar-mem">0%</div>
+                            <div class="bar">
+                                <div class="bar-fill" id="mem-bar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="label">NETWORK</div>
+                            <div class="value" id="sidebar-net">0 KB/s</div>
+                            <div class="bar">
+                                <div class="bar-fill" id="net-bar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="label">DISK I/O</div>
+                            <div class="value" id="sidebar-disk">0 MB/s</div>
+                            <div class="bar">
+                                <div class="bar-fill" id="disk-bar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Center Panel: Dynamic Views -->
+        <section class="center-panel">
+            <!-- Task Orchestrator View -->
+            <div class="view-panel active" id="tasks-view">
+                <div class="panel">
+                    <div class="panel-header">
+                        <span class="panel-title">Task Queue</span>
+                        <span class="panel-status">12 Active</span>
+                    </div>
+                    <div class="panel-content">
+                        <div class="task-list" id="task-list">
+                            <div class="task-item">
+                                <span class="task-name">ML Model Training - ResNet50</span>
+                                <span class="task-status running">RUNNING</span>
+                            </div>
+                            <div class="task-item">
+                                <span class="task-name">Data Pipeline - ETL Process</span>
+                                <span class="task-status running">RUNNING</span>
+                            </div>
+                            <div class="task-item">
+                                <span class="task-name">API Health Check - Cluster</span>
+                                <span class="task-status queued">QUEUED</span>
+                            </div>
+                            <div class="task-item">
+                                <span class="task-name">Backup - Database Snapshot</span>
+                                <span class="task-status queued">QUEUED</span>
+                            </div>
+                            <div class="task-item">
+                                <span class="task-name">Log Aggregation - 24h</span>
+                                <span class="task-status completed">COMPLETED</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Security Center View -->
+            <div class="view-panel" id="security-view">
+                <div class="panel">
+                    <div class="panel-header">
+                        <span class="panel-title">Security Alerts</span>
+                        <span class="panel-status">3 Active</span>
+                    </div>
+                    <div class="panel-content">
+                        <div class="alert-list">
+                            <div class="alert-item">
+                                <span class="alert-icon warning">⚠</span>
+                                <div class="alert-content">
+                                    <div class="alert-title">Unusual login pattern detected</div>
+                                    <div class="alert-time">2 minutes ago</div>
+                                </div>
+                            </div>
+                            <div class="alert-item">
+                                <span class="alert-icon info">ℹ</span>
+                                <div class="alert-content">
+                                    <div class="alert-title">Firewall rules updated</div>
+                                    <div class="alert-time">15 minutes ago</div>
+                                </div>
+                            </div>
+                            <div class="alert-item">
+                                <span class="alert-icon danger">⚠</span>
+                                <div class="alert-content">
+                                    <div class="alert-title">High network traffic anomaly</div>
+                                    <div class="alert-time">1 hour ago</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ML Optimization View -->
+            <div class="view-panel" id="ml-view">
+                <div class="panel">
+                    <div class="panel-header">
+                        <span class="panel-title">ML Models</span>
+                        <span class="panel-status">4 Active</span>
+                    </div>
+                    <div class="panel-content">
+                        <div class="metrics-grid">
+                            <div class="metric-box">
+                                <div class="label">PREDICTOR ACCURACY</div>
+                                <div class="value">87.3%</div>
+                            </div>
+                            <div class="metric-box">
+                                <div class="label">ANOMALY DETECTOR</div>
+                                <div class="value">95.1%</div>
+                            </div>
+                            <div class="metric-box">
+                                <div class="label">GNN SCHEDULER</div>
+                                <div class="value">Active</div>
+                            </div>
+                            <div class="metric-box">
+                                <div class="label">PPO REWARD</div>
+                                <div class="value">0.82</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cluster Status View -->
+            <div class="view-panel" id="cluster-view">
+                <div class="panel">
+                    <div class="panel-header">
+                        <span class="panel-title">Cluster Nodes</span>
+                        <span class="panel-status">2 Online</span>
+                    </div>
+                    <div class="panel-content">
+                        <div class="task-list">
+                            <div class="task-item">
+                                <span class="task-name">node-1 (Primary)</span>
+                                <span class="task-status running">HEALTHY</span>
+                            </div>
+                            <div class="task-item">
+                                <span class="task-name">node-2 (Secondary)</span>
+                                <span class="task-status running">HEALTHY</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </section>
+    </div>
 
-        <script src="_renderer.js"></script>
-    </body>
+    <!-- Status Bar -->
+    <footer class="status-bar">
+        <span class="status-item">KERNEL: <span class="ok">ONLINE</span></span>
+        <span class="status-item">ML ENGINE: <span class="ok">ACTIVE</span></span>
+        <span class="status-item">SECURITY: <span class="ok">MONITORING</span></span>
+        <span class="status-item">CLUSTER: <span class="warn">2 NODES</span></span>
+    </footer>
+
+    <script>
+        // API Configuration
+        const API_BASE = 'http://localhost:8000';
+
+        // Tab navigation
+        document.querySelectorAll('.nav-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Update active tab
+                document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+
+                // Show corresponding view
+                const viewId = tab.dataset.view + '-view';
+                document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active'));
+                document.getElementById(viewId).classList.add('active');
+            });
+        });
+
+        // Window controls (for Electron)
+        document.getElementById('minimize-btn').addEventListener('click', () => {
+            if (window.electronAPI) window.electronAPI.minimize();
+        });
+
+        document.getElementById('maximize-btn').addEventListener('click', () => {
+            if (window.electronAPI) window.electronAPI.maximize();
+        });
+
+        document.getElementById('close-btn').addEventListener('click', () => {
+            if (window.electronAPI) window.electronAPI.close();
+        });
+
+        // Update timestamp
+        function updateTimestamp() {
+            document.getElementById('timestamp').textContent = new Date().toISOString();
+        }
+        setInterval(updateTimestamp, 1000);
+        updateTimestamp();
+
+        // Fetch metrics from API
+        async function fetchMetrics() {
+            try {
+                const response = await fetch(`${API_BASE}/api/v1/system/metrics`);
+                if (response.ok) {
+                    const data = await response.json();
+
+                    const cpu = (data.cpu_utilization * 100).toFixed(1);
+                    const mem = (data.memory_utilization * 100).toFixed(1);
+
+                    document.getElementById('cpu-metric').textContent = cpu + '%';
+                    document.getElementById('mem-metric').textContent = mem + '%';
+                    document.getElementById('sidebar-cpu').textContent = cpu + '%';
+                    document.getElementById('sidebar-mem').textContent = mem + '%';
+                    document.getElementById('cpu-bar').style.width = cpu + '%';
+                    document.getElementById('mem-bar').style.width = mem + '%';
+                }
+            } catch (e) {
+                console.log('API not available:', e.message);
+            }
+        }
+
+        // Fetch tasks from API
+        async function fetchTasks() {
+            try {
+                const response = await fetch(`${API_BASE}/api/v1/tasks`);
+                if (response.ok) {
+                    const data = await response.json();
+                    const taskList = document.getElementById('task-list');
+
+                    if (data.tasks && data.tasks.length > 0) {
+                        taskList.innerHTML = data.tasks.map(task => `
+                            <div class="task-item">
+                                <span class="task-name">${task.name}</span>
+                                <span class="task-status ${task.status}">${task.status.toUpperCase()}</span>
+                            </div>
+                        `).join('');
+                    }
+                }
+            } catch (e) {
+                console.log('Tasks API not available');
+            }
+        }
+
+        // Poll data every 2 seconds
+        setInterval(fetchMetrics, 2000);
+        setInterval(fetchTasks, 5000);
+
+        // Initial fetch
+        fetchMetrics();
+        fetchTasks();
+    </script>
+</body>
+
 </html>

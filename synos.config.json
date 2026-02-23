@@ -1,0 +1,26 @@
+{
+    "backend": {
+        "development": {
+            "apiUrl": "http://localhost:8000",
+            "wsUrl": "ws://localhost:8000",
+            "apiKey": "dev-token-12345"
+        },
+        "production": {
+            "apiUrl": "https://synos.example.com",
+            "wsUrl": "wss://synos.example.com",
+            "apiKey": "${SYNOS_API_KEY}"
+        }
+    },
+    "ui": {
+        "metricsUpdateInterval": 5000,
+        "maxHistoryPoints": 60,
+        "theme": "dark"
+    },
+    "features": {
+        "clustering": true,
+        "mlDashboard": true,
+        "taskOrchestration": true,
+        "alerting": true,
+        "reporting": true
+    }
+}
