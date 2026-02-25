@@ -1,13 +1,32 @@
 <script lang="ts">
-  import { cpuStore, memoryStore, networkStore } from '../../stores/synos/kernel'
+  import {
+    cpuStore,
+    memoryStore,
+    networkStore,
+  } from "../../stores/synos/kernel";
 
-  let cpu = null
-  let memory = null
-  let network = null
+  interface CpuMetric {
+    displayValue: string;
+    cores: number;
+    frequency: number;
+  }
+  interface MemoryMetric {
+    displayValue: string;
+    used: number;
+    total: number;
+  }
+  interface NetworkMetric {
+    inboundMbps: number;
+    outboundMbps: number;
+  }
 
-  cpuStore.subscribe((value) => (cpu = value))
-  memoryStore.subscribe((value) => (memory = value))
-  networkStore.subscribe((value) => (network = value))
+  let cpu: CpuMetric | null = null;
+  let memory: MemoryMetric | null = null;
+  let network: NetworkMetric | null = null;
+
+  cpuStore.subscribe((value) => (cpu = value));
+  memoryStore.subscribe((value) => (memory = value));
+  networkStore.subscribe((value) => (network = value));
 </script>
 
 <div class="system-metrics">
@@ -26,14 +45,18 @@
       <div class="metric-box">
         <h3>MEMORY</h3>
         <div class="value">{memory.displayValue}</div>
-        <div class="detail">{memory.used.toFixed(1)} / {memory.total.toFixed(1)} GB</div>
+        <div class="detail">
+          {memory.used.toFixed(1)} / {memory.total.toFixed(1)} GB
+        </div>
       </div>
     {/if}
 
     {#if network}
       <div class="metric-box">
         <h3>NETWORK</h3>
-        <div class="value">⬇ {network.inboundMbps} ⬆ {network.outboundMbps}</div>
+        <div class="value">
+          ⬇ {network.inboundMbps} ⬆ {network.outboundMbps}
+        </div>
         <div class="detail">Mbps</div>
       </div>
     {/if}

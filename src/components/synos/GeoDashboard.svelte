@@ -43,10 +43,9 @@
                 prediction.future_points &&
                 prediction.future_points.length > 0
             ) {
-                const latlngs = prediction.future_points.map((p) => [
-                    p[0],
-                    p[1],
-                ]);
+                const latlngs = prediction.future_points.map(
+                    (p: [number, number]) => [p[0], p[1]],
+                );
                 L.polyline(latlngs, {
                     color: "#00ffff",
                     dashArray: "5, 10",
@@ -65,7 +64,7 @@
         }
     }
 
-    function updateCurrentLocation(lat, lng) {
+    function updateCurrentLocation(lat: number, lng: number) {
         if (!map) return;
 
         // Add marker for current location
@@ -98,14 +97,16 @@
 
             // WebSocket Listeners
             try {
-                cleanupWS = synosClient.onGeoLocationUpdate((loc) => {
-                    console.log("Geo update via WS:", loc);
-                    if (loc.latitude && loc.longitude) {
-                        updateCurrentLocation(loc.latitude, loc.longitude);
-                        // Trigger prediction update when location changes
-                        updateMap();
-                    }
-                });
+                cleanupWS = synosClient.onGeoLocationUpdate(
+                    (loc: { latitude: number; longitude: number }) => {
+                        console.log("Geo update via WS:", loc);
+                        if (loc.latitude && loc.longitude) {
+                            updateCurrentLocation(loc.latitude, loc.longitude);
+                            // Trigger prediction update when location changes
+                            updateMap();
+                        }
+                    },
+                );
             } catch (e) {
                 console.warn("WS setup failed:", e);
                 // Fallback polling

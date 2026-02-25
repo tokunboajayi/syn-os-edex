@@ -1,6 +1,6 @@
 <script lang="ts">
     import { onMount, onDestroy } from "svelte";
-    import { synosConfig } from "../modules/synos/config";
+    import { synosConfig } from "../../modules/synos/config";
 
     // ── Types ──────────────────────────────────────────────────────────────────
     interface FloorPlan {
@@ -176,7 +176,7 @@
         await fetchFloorPlans();
 
         // Listen to WebSocket for live device location updates
-        const { getSynosAPI } = await import("../modules/synos/init");
+        const { getSynosAPI } = await import("../../modules/synos/init");
         const api = getSynosAPI();
         if (api && api["socket"]) {
             const sock = api["socket"];
@@ -217,20 +217,19 @@
         {:else}
             <ul class="plan-list">
                 {#each floorPlans as plan}
-                    <li
-                        class="plan-item"
-                        class:active={selectedPlanId === plan.id}
-                        on:click={() => handlePlanSelect(plan)}
-                        on:keydown={(e) =>
-                            e.key === "Enter" && handlePlanSelect(plan)}
-                        tabindex="0"
-                        role="button"
-                    >
-                        <span class="plan-floor">F{plan.floor}</span>
-                        <div class="plan-info">
-                            <strong>{plan.name}</strong>
-                            <small>{plan.building}</small>
-                        </div>
+                    <li class="plan-item-wrapper">
+                        <button
+                            class="plan-item"
+                            class:active={selectedPlanId === plan.id}
+                            on:click={() => handlePlanSelect(plan)}
+                            type="button"
+                        >
+                            <span class="plan-floor">F{plan.floor}</span>
+                            <div class="plan-info">
+                                <strong>{plan.name}</strong>
+                                <small>{plan.building}</small>
+                            </div>
+                        </button>
                     </li>
                 {/each}
             </ul>
@@ -265,7 +264,9 @@
     {#if showUploadModal}
         <div
             class="modal-backdrop"
+            role="presentation"
             on:click|self={() => (showUploadModal = false)}
+            on:keydown={(e) => e.key === "Escape" && (showUploadModal = false)}
         >
             <div
                 class="modal"
@@ -390,6 +391,12 @@
         gap: 4px;
     }
 
+    .plan-item-wrapper {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
     .plan-item {
         display: flex;
         align-items: center;
@@ -401,6 +408,11 @@
         transition:
             background 0.2s,
             border-color 0.2s;
+        width: 100%;
+        background: transparent;
+        color: inherit;
+        font: inherit;
+        text-align: left;
     }
     .plan-item:hover {
         background: rgba(0, 200, 255, 0.08);
