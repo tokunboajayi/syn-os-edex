@@ -1,6 +1,10 @@
 <script lang="ts">
-    import { onMount } from "svelte";
+    import { onMount, onDestroy } from "svelte";
     import { getSynosAPI } from "../../modules/synos/init";
+    import {
+        VoiceController,
+        type VoiceCommand,
+    } from "../../modules/synos/voice";
 
     import SystemMetrics from "./SystemMetrics.svelte";
     import TaskOrchestrator from "./TaskOrchestrator.svelte";
@@ -8,30 +12,50 @@
     import MLOptimization from "./MLOptimization.svelte";
     import ClusterStatus from "./ClusterStatus.svelte";
     import GeoDashboard from "./GeoDashboard.svelte";
+    import ThreatIntel from "./ThreatIntel.svelte";
+    import DeviceManager from "./DeviceManager.svelte";
 
     // Current active view
     let activeView = "tasks";
 
-    // System time (updated every second for EDEX-UI feel)
+    // System time
     let systemTime = new Date().toISOString();
     let cpuUsage = 0;
     let memUsage = 0;
 
+    // Voice
+    let voiceState: "listening" | "idle" | "unsupported" = "idle";
+    let voiceController: VoiceController;
+    let lastVoiceCmd = "";
+
     const views = [
         { id: "tasks", label: "TASK ORCHESTRATOR", icon: "◉" },
         { id: "security", label: "SECURITY CENTER", icon: "⬢" },
+        { id: "threats", label: "THREAT INTEL", icon: "⚠" },
         { id: "geo", label: "GEOSPATIAL INTEL", icon: "⌖" },
+        { id: "devices", label: "DEVICES", icon: "📡" },
         { id: "ml", label: "ML OPTIMIZATION", icon: "◆" },
         { id: "cluster", label: "CLUSTER STATUS", icon: "⬡" },
     ];
 
+    const VOICE_TAB_MAP: Record<VoiceCommand, string> = {
+        scan: "tasks",
+        metrics: "tasks",
+        geo: "geo",
+        indoor: "geo",
+        threats: "threats",
+        devices: "devices",
+        security: "security",
+        stop: "",
+    };
+
     onMount(() => {
-        // Update clock every second
+        // Clock
         const interval = setInterval(() => {
             systemTime = new Date().toISOString();
         }, 1000);
 
-        // Fetch metrics periodically
+        // Metrics
         const metricsInterval = setInterval(async () => {
             try {
                 const api = getSynosAPI();
@@ -41,9 +65,23 @@
                     memUsage = metrics.memory.utilization * 100;
                 }
             } catch (e) {
-                // Ignore errors
+                /* ignore */
             }
         }, 2000);
+
+        // Voice controller
+        voiceController = new VoiceController(
+            (evt) => {
+                lastVoiceCmd = evt.raw;
+                const tab = VOICE_TAB_MAP[evt.command];
+                if (tab) setActiveView(tab);
+                if (evt.command === "stop") voiceController.stop();
+            },
+            (state) => {
+                voiceState = state;
+            },
+        );
+        voiceController.start();
 
         return () => {
             clearInterval(interval);
@@ -51,8 +89,18 @@
         };
     });
 
+    onDestroy(() => voiceController?.stop());
+
     function setActiveView(viewId: string) {
         activeView = viewId;
+    }
+
+    function toggleVoice() {
+        if (voiceState === "listening") {
+            voiceController.stop();
+        } else {
+            voiceController.start();
+        }
     }
 </script>
 
@@ -86,6 +134,21 @@
                 <span class="metric-label">MEM</span>
                 <span class="metric-value">{memUsage.toFixed(1)}%</span>
             </div>
+            <button
+                class="mic-btn"
+                class:listening={voiceState === "listening"}
+                class:unsupported={voiceState === "unsupported"}
+                on:click={toggleVoice}
+                title={voiceState === "listening"
+                    ? 'Voice active — say "Synapse, <command>"'
+                    : "Enable voice commands"}
+            >
+                {voiceState === "listening"
+                    ? "🎙"
+                    : voiceState === "unsupported"
+                      ? "🔇"
+                      : "🎤"}
+            </button>
             <span class="timestamp">{systemTime}</span>
         </div>
     </nav>
@@ -103,12 +166,16 @@
                 <TaskOrchestrator />
             {:else if activeView === "security"}
                 <SecurityMonitor />
+            {:else if activeView === "threats"}
+                <ThreatIntel />
+            {:else if activeView === "geo"}
+                <GeoDashboard />
+            {:else if activeView === "devices"}
+                <DeviceManager />
             {:else if activeView === "ml"}
                 <MLOptimization />
             {:else if activeView === "cluster"}
                 <ClusterStatus />
-            {:else if activeView === "geo"}
-                <GeoDashboard />
             {/if}
         </section>
     </div>
@@ -126,6 +193,19 @@
         <span class="status-item"
             >CLUSTER: <span class="warn">2 NODES</span></span
         >
+        <span class="status-item"
+            >VOICE:
+            {#if voiceState === "listening"}
+                <span class="ok">ACTIVE</span>
+            {:else if voiceState === "unsupported"}
+                <span class="error">N/A</span>
+            {:else}
+                <span class="warn">OFF</span>
+            {/if}
+        </span>
+        {#if lastVoiceCmd}<span class="status-item voice-last"
+                >❝ {lastVoiceCmd} ❞</span
+            >{/if}
     </footer>
 </div>
 
@@ -283,5 +363,44 @@
     .status-item .error {
         color: #ff0033;
         text-shadow: 0 0 5px #ff0033;
+    }
+
+    .mic-btn {
+        background: transparent;
+        border: 1px solid #333;
+        border-radius: 4px;
+        cursor: pointer;
+        padding: 4px 8px;
+        font-size: 1em;
+        transition: all 0.2s;
+        line-height: 1;
+    }
+    .mic-btn:hover {
+        border-color: #00ffff;
+        background: rgba(0, 255, 255, 0.06);
+    }
+    .mic-btn.listening {
+        border-color: #00ff80;
+        animation: mic-pulse 1.5s ease-in-out infinite;
+    }
+    .mic-btn.unsupported {
+        opacity: 0.4;
+        cursor: not-allowed;
+    }
+
+    @keyframes mic-pulse {
+        0%,
+        100% {
+            box-shadow: 0 0 0px rgba(0, 255, 128, 0);
+        }
+        50% {
+            box-shadow: 0 0 8px rgba(0, 255, 128, 0.6);
+        }
+    }
+
+    .voice-last {
+        color: #4a6a4a;
+        font-size: 0.75em;
+        font-style: italic;
     }
 </style>
