@@ -217,7 +217,7 @@
         {:else}
             <ul class="plan-list">
                 {#each floorPlans as plan}
-                    <li class="plan-item-wrapper">
+                    <li>
                         <button
                             class="plan-item"
                             class:active={selectedPlanId === plan.id}
@@ -391,12 +391,6 @@
         gap: 4px;
     }
 
-    .plan-item-wrapper {
-        list-style: none;
-        margin: 0;
-        padding: 0;
-    }
-
     .plan-item {
         display: flex;
         align-items: center;
@@ -408,11 +402,6 @@
         transition:
             background 0.2s,
             border-color 0.2s;
-        width: 100%;
-        background: transparent;
-        color: inherit;
-        font: inherit;
-        text-align: left;
     }
     .plan-item:hover {
         background: rgba(0, 200, 255, 0.08);
